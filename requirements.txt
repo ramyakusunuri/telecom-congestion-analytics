@@ -1,0 +1,44 @@
+# ============================================================
+# Telecom Network Congestion Prediction & Hotspot Analytics
+# Python 3.10 / 3.11 compatible
+# ============================================================
+
+# --- Core data handling ---
+pandas==2.1.4
+numpy==1.26.4
+pyarrow==14.0.2
+python-dotenv==1.0.1
+PyYAML==6.0.1
+
+# --- Big Data processing ---
+pyspark==3.5.1
+
+# --- Machine Learning ---
+scikit-learn==1.4.2
+xgboost==2.0.3
+joblib==1.3.2
+
+# --- Geospatial / Hotspot analytics ---
+# geopandas is optional: it can be difficult to install on Windows
+# because of GDAL/Fiona binary dependencies. The project works fully
+# without it (DBSCAN uses plain lat/lon with scikit-learn).
+# Uncomment the next 2 lines only if geopandas installs cleanly on your machine.
+# geopandas==0.14.3
+# shapely==2.0.3
+
+# --- Database ---
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.29
+
+# --- Dashboard / Visualization ---
+streamlit==1.33.0
+plotly==5.21.0
+folium==0.16.0
+streamlit-folium==0.20.0
+
+# --- Optional streaming (Kafka) - lightweight client only ---
+kafka-python==2.0.2
+
+# --- Utilities ---
+tqdm==4.66.2
+Faker==24.4.0

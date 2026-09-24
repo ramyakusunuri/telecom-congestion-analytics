@@ -1,0 +1,15 @@
+.env
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+data/raw/*
+data/synthetic/*
+data/processed/*
+!data/raw/.gitkeep
+!data/synthetic/.gitkeep
+!data/processed/.gitkeep
+ml/models/*.pkl
+ml/models/*.json
+.venv/
+venv/
+*.egg-info/

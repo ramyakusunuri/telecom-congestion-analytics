@@ -1,0 +1,131 @@
+# ============================================================
+# Central configuration for Telecom Congestion Analytics
+# Every module reads settings from this file (via config/config_loader.py)
+# ============================================================
+
+project:
+  name: "Telecom Network Congestion Prediction & Hotspot Analytics"
+  random_seed: 42
+
+# ------------------------------------------------------------
+# Synthetic data generation
+# ------------------------------------------------------------
+data_generation:
+  num_towers: 100
+  cells_per_tower: 3              # sectors per tower -> total cells = num_towers * cells_per_tower
+  num_records: 150000             # default target row count (~70% demo size). Set up to 1,000,000+ for full scale.
+  simulation_days: 60             # span of the generated history
+  cities:
+    - "Hyderabad"
+    - "Bengaluru"
+    - "Mumbai"
+    - "Pune"
+    - "Chennai"
+  zones: ["North", "South", "East", "West", "Central"]
+  technology_mix:
+    "4G": 0.6
+    "5G": 0.4
+  tower_types: ["Macro", "Micro", "Small Cell"]
+  # peak traffic multipliers by hour-of-day (0-23), used by generator
+  peak_hours:
+    morning: [8, 9, 10]
+    lunch: [12, 13, 14]
+    evening: [18, 19, 20, 21]
+    night_low: [0, 1, 2, 3, 4, 5]
+  congestion_event_probability: 0.015   # probability a given (tower, timestamp) row gets a random congestion spike event
+
+# ------------------------------------------------------------
+# File paths (relative to project root)
+# ------------------------------------------------------------
+paths:
+  raw_dir: "data/raw"
+  synthetic_dir: "data/synthetic"
+  processed_dir: "data/processed"
+  models_dir: "ml/models"
+  tower_info_file: "data/synthetic/tower_info.csv"
+  network_metrics_file: "data/synthetic/network_metrics.csv"
+  traffic_history_file: "data/synthetic/traffic_history.csv"
+  processed_features_file: "data/processed/features.parquet"
+  processed_features_csv: "data/processed/features.csv"
+  predictions_file: "data/processed/congestion_predictions.csv"
+  hotspots_file: "data/processed/hotspots.csv"
+  alerts_file: "data/processed/alerts.csv"
+  model_metrics_file: "ml/models/model_metrics.json"
+
+# ------------------------------------------------------------
+# Congestion scoring engine
+# ------------------------------------------------------------
+congestion:
+  weights:
+    bandwidth_utilization: 0.35
+    user_load_ratio: 0.25
+    traffic_norm: 0.15
+    latency_norm: 0.15
+    packet_loss_norm: 0.10
+  thresholds:
+    low_max: 30
+    moderate_max: 60
+    high_max: 80
+    # anything above high_max -> CRITICAL
+  latency_reference_ms: 150        # latency considered "very bad" for normalization
+  packet_loss_reference_pct: 8     # packet loss considered "very bad" for normalization
+
+# ------------------------------------------------------------
+# Machine Learning
+# ------------------------------------------------------------
+ml:
+  test_size: 0.2                   # chronological holdout fraction (last X% of time used as test)
+  prediction_horizon_minutes: 15   # predict congestion level this far into the future
+  models:
+    - "logistic_regression"
+    - "decision_tree"
+    - "random_forest"
+    - "gradient_boosting"
+    - "xgboost"
+  random_forest:
+    n_estimators: 200
+    max_depth: 12
+  gradient_boosting:
+    n_estimators: 150
+    max_depth: 5
+  xgboost:
+    n_estimators: 200
+    max_depth: 6
+    learning_rate: 0.1
+  decision_tree:
+    max_depth: 10
+
+# ------------------------------------------------------------
+# Hotspot detection (DBSCAN)
+# ------------------------------------------------------------
+hotspot:
+  eps_km: 2.0                      # neighborhood radius in km
+  min_samples: 3
+  persistent_hotspot_min_occurrences_pct: 0.4   # tower flagged "persistent" if congested >40% of observed time
+
+# ------------------------------------------------------------
+# Alerts
+# ------------------------------------------------------------
+alerts:
+  utilization_critical_pct: 90
+  predicted_congestion_probability_pct: 80
+  packet_loss_alert_pct: 5
+  latency_alert_ms: 120
+
+# ------------------------------------------------------------
+# Database (PostgreSQL) - credentials come from .env, never hard-coded
+# ------------------------------------------------------------
+database:
+  enabled_flag_env: "USE_POSTGRES"   # if this env var is not "true", app falls back to CSV/Parquet
+  host_env: "DB_HOST"
+  port_env: "DB_PORT"
+  name_env: "DB_NAME"
+  user_env: "DB_USER"
+  password_env: "DB_PASSWORD"
+
+# ------------------------------------------------------------
+# Streaming simulation
+# ------------------------------------------------------------
+streaming:
+  interval_seconds: 5
+  batch_size: 20
